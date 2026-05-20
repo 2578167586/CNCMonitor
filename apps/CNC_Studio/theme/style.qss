@@ -1,0 +1,272 @@
+/* ===== Global ===== */
+QMainWindow {
+    background-color: #0d1117;
+}
+QWidget {
+    background-color: #0d1117;
+    color: #e6edf3;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 12px;
+}
+
+/* ===== Buttons ===== */
+QPushButton {
+    background-color: #21262d;
+    color: #e6edf3;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 6px 16px;
+    min-height: 20px;
+}
+QPushButton:hover {
+    background-color: #30363d;
+}
+QPushButton:pressed {
+    background-color: #161b22;
+}
+QPushButton:disabled {
+    color: #484f58;
+    background-color: #161b22;
+}
+
+/* Primary button (blue) */
+QPushButton[cssClass="primary"] {
+    background-color: #3b82f6;
+    color: #ffffff;
+    border: 1px solid #3b82f6;
+}
+QPushButton[cssClass="primary"]:hover {
+    background-color: #2563eb;
+}
+
+/* Success button (green) */
+QPushButton[cssClass="success"] {
+    background-color: #22c55e;
+    color: #ffffff;
+    border: 1px solid #22c55e;
+}
+QPushButton[cssClass="success"]:hover {
+    background-color: #16a34a;
+}
+
+/* Danger button (red) */
+QPushButton[cssClass="danger"] {
+    background-color: #ef4444;
+    color: #ffffff;
+    border: 1px solid #ef4444;
+}
+QPushButton[cssClass="danger"]:hover {
+    background-color: #dc2626;
+}
+
+/* Ghost danger (transparent bg, red border) */
+QPushButton[cssClass="ghost-danger"] {
+    background-color: transparent;
+    color: #ef4444;
+    border: 1px solid #ef4444;
+}
+QPushButton[cssClass="ghost-danger"]:hover {
+    background-color: rgba(239, 68, 68, 0.15);
+}
+
+/* ===== Input Controls ===== */
+QLineEdit {
+    background-color: #0d1117;
+    color: #e6edf3;
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    padding: 4px 8px;
+    selection-background-color: #3b82f6;
+}
+QLineEdit:focus {
+    border-color: #3b82f6;
+}
+
+QSpinBox, QDoubleSpinBox {
+    background-color: #0d1117;
+    color: #e6edf3;
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+QSpinBox:focus, QDoubleSpinBox:focus {
+    border-color: #3b82f6;
+}
+QSpinBox::up-button, QDoubleSpinBox::up-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right;
+    width: 20px;
+    border-left: 1px solid #30363d;
+    border-bottom: 1px solid #30363d;
+    border-top-right-radius: 4px;
+}
+QSpinBox::down-button, QDoubleSpinBox::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: bottom right;
+    width: 20px;
+    border-left: 1px solid #30363d;
+    border-bottom-right-radius: 4px;
+}
+
+QComboBox {
+    background-color: #0d1117;
+    color: #e6edf3;
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+QComboBox:focus {
+    border-color: #3b82f6;
+}
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 20px;
+    border-left: 1px solid #30363d;
+}
+QComboBox QAbstractItemView {
+    background-color: #161b22;
+    color: #e6edf3;
+    border: 1px solid #30363d;
+    selection-background-color: #3b82f6;
+}
+
+/* ===== Tables ===== */
+QTableWidget, QTableView {
+    background-color: #161b22;
+    color: #e6edf3;
+    border: 1px solid #30363d;
+    gridline-color: #30363d;
+    selection-background-color: rgba(59, 130, 246, 0.25);
+    selection-color: #e6edf3;
+    alternate-background-color: #1a1a2e;
+}
+QTableWidget::item, QTableView::item {
+    padding: 4px 8px;
+}
+QHeaderView::section {
+    background-color: #0d1117;
+    color: #8b949e;
+    border: none;
+    border-bottom: 1px solid #30363d;
+    border-right: 1px solid #30363d;
+    padding: 6px 8px;
+    font-weight: bold;
+}
+
+/* ===== List Widget ===== */
+QListWidget {
+    background-color: #161b22;
+    color: #e6edf3;
+    border: 1px solid #30363d;
+    outline: none;
+}
+QListWidget::item {
+    padding: 6px 8px;
+    border-bottom: 1px solid #30363d;
+}
+QListWidget::item:selected {
+    background-color: rgba(59, 130, 246, 0.25);
+}
+
+/* ===== Text Edit ===== */
+QTextEdit {
+    background-color: #0d1117;
+    color: #c9d1d9;
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    padding: 8px;
+    font-family: "Consolas", "SF Mono", monospace;
+    font-size: 11px;
+}
+
+/* ===== Scrollbars ===== */
+QScrollBar:vertical {
+    background: #0d1117;
+    width: 10px;
+    border-radius: 5px;
+}
+QScrollBar::handle:vertical {
+    background: #30363d;
+    border-radius: 5px;
+    min-height: 30px;
+}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0;
+}
+QScrollBar:horizontal {
+    background: #0d1117;
+    height: 10px;
+    border-radius: 5px;
+}
+QScrollBar::handle:horizontal {
+    background: #30363d;
+    border-radius: 5px;
+    min-width: 30px;
+}
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0;
+}
+
+/* ===== Labels ===== */
+QLabel {
+    background: transparent;
+    color: #e6edf3;
+}
+QLabel[cssClass="subtitle"] {
+    color: #8b949e;
+    font-size: 11px;
+}
+
+/* ===== Splitters ===== */
+QSplitter::handle {
+    background-color: #30363d;
+}
+QSplitter::handle:vertical {
+    height: 1px;
+}
+QSplitter::handle:horizontal {
+    width: 1px;
+}
+
+/* ===== Card container ===== */
+QWidget[cssClass="card"] {
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+}
+
+/* ===== Title bar ===== */
+QWidget[cssClass="titleBar"] {
+    background-color: #1a1a2e;
+}
+
+/* ===== Status bar ===== */
+QWidget[cssClass="statusBar"] {
+    background-color: #161b22;
+    border-top: 1px solid #30363d;
+}
+
+/* ===== Sidebar ===== */
+QWidget[cssClass="sidebar"] {
+    background-color: #161b22;
+    border-right: 1px solid #30363d;
+}
+
+QPushButton[cssClass="navBtn"] {
+    background-color: transparent;
+    color: #8b949e;
+    border: none;
+    border-radius: 0;
+    padding: 12px 8px;
+    text-align: left;
+}
+QPushButton[cssClass="navBtn"]:hover {
+    background-color: #21262d;
+    color: #e6edf3;
+}
+QPushButton[cssClass="navBtn"][selected="true"] {
+    background-color: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+    border-left: 3px solid #3b82f6;
+}
