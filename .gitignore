@@ -34,6 +34,12 @@ Desktop.ini
 # === Stack dumps ===
 *.stackdump
 
+# === Build wrapper scripts (qmake auto-generated) ===
+target_wrapper.bat
+target_wrapper.sh
+
+# === Local / personal files ===
 docs/
-.claude/
+.claude/plans/
+.claude/settings*
 agent.md
