@@ -31,6 +31,12 @@ MonitorPage::MonitorPage(QWidget *parent)
     connect(engine, &MonitorEngine::storageError, this, [this](const QString &msg) {
         messageLabel->setText(QStringLiteral("Storage error: %1").arg(msg));
     });
+
+    // Throttle UI updates to ~16 FPS (60 ms)
+    flushTimer = new QTimer(this);
+    flushTimer->setInterval(60);
+    connect(flushTimer, &QTimer::timeout, this, &MonitorPage::flushStatusUpdates);
+    flushTimer->start();
 }
 
 QWidget *MonitorPage::createCard(const QString &title, QWidget *content)
@@ -256,6 +262,9 @@ void MonitorPage::startMonitor()
     }
     deviceCards.clear();
 
+    pendingStatuses.clear();
+    flushCounter = 0;
+
     // Create new device cards
     for (int i = 0; i < count; ++i) {
         QWidget *card = createDeviceCard(static_cast<quint8>(i + 1));
@@ -281,50 +290,68 @@ void MonitorPage::stopMonitor()
 
 void MonitorPage::onStatusUpdated(DeviceStatus status)
 {
-    ensureStatusRow(status.deviceId);
-    const int row = status.deviceId - 1;
-    messageLabel->setText(QStringLiteral("Recv D%1 X=%2 Y=%3 Z=%4 RPM=%5")
-        .arg(status.deviceId).arg(status.x, 0, 'f', 1)
-        .arg(status.y, 0, 'f', 1).arg(status.z, 0, 'f', 1)
-        .arg(status.spindleRpm));
+    // Just cache the latest status — flushStatusUpdates() does the actual UI work
+    pendingStatuses.insert(status.deviceId, status);
 
-    // Device column with colored dot
-    QTableWidgetItem *devItem = statusTable->item(row, 0);
-    if (!devItem) {
-        devItem = new QTableWidgetItem;
-        statusTable->setItem(row, 0, devItem);
+    // Update message only every ~15 flushes (~1 sec at 16 FPS)
+    ++flushCounter;
+    if (flushCounter % 15 == 0) {
+        messageLabel->setText(QStringLiteral("Receiving data for %1 device(s)…")
+            .arg(pendingStatuses.size()));
     }
-    devItem->setIcon(QIcon(statusDotPixmap(runStateColor(status.runState))));
-    devItem->setText(QString::number(status.deviceId));
+}
 
-    // Data columns
-    auto setCell = [&](int col, const QString &text) {
-        QTableWidgetItem *item = statusTable->item(row, col);
-        if (!item) {
-            item = new QTableWidgetItem;
-            statusTable->setItem(row, col, item);
+void MonitorPage::flushStatusUpdates()
+{
+    if (pendingStatuses.isEmpty())
+        return;
+
+    for (auto it = pendingStatuses.constBegin(); it != pendingStatuses.constEnd(); ++it) {
+        const DeviceStatus &status = it.value();
+        ensureStatusRow(status.deviceId);
+        const int row = status.deviceId - 1;
+
+        // Device column with colored dot
+        QTableWidgetItem *devItem = statusTable->item(row, 0);
+        if (!devItem) {
+            devItem = new QTableWidgetItem;
+            statusTable->setItem(row, 0, devItem);
         }
-        item->setText(text);
-        item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    };
+        devItem->setIcon(QIcon(statusDotPixmap(runStateColor(status.runState))));
+        devItem->setText(QString::number(status.deviceId));
 
-    setCell(1, QString::number(status.x, 'f', 2));
-    setCell(2, QString::number(status.y, 'f', 2));
-    setCell(3, QString::number(status.z, 'f', 2));
-    setCell(4, QString::number(status.spindleRpm));
-    setCell(5, QString::number(status.servoLoad, 'f', 1));
-    setCell(6, QString::number(status.temperature, 'f', 1));
+        // Data columns
+        auto setCell = [&](int col, const QString &text) {
+            QTableWidgetItem *item = statusTable->item(row, col);
+            if (!item) {
+                item = new QTableWidgetItem;
+                statusTable->setItem(row, col, item);
+            }
+            item->setText(text);
+            item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        };
 
-    // State column with colored dot
-    QTableWidgetItem *stateItem = statusTable->item(row, 7);
-    if (!stateItem) {
-        stateItem = new QTableWidgetItem;
-        statusTable->setItem(row, 7, stateItem);
+        setCell(1, QString::number(status.x, 'f', 2));
+        setCell(2, QString::number(status.y, 'f', 2));
+        setCell(3, QString::number(status.z, 'f', 2));
+        setCell(4, QString::number(status.spindleRpm));
+        setCell(5, QString::number(status.servoLoad, 'f', 1));
+        setCell(6, QString::number(status.temperature, 'f', 1));
+
+        // State column with colored dot
+        QTableWidgetItem *stateItem = statusTable->item(row, 7);
+        if (!stateItem) {
+            stateItem = new QTableWidgetItem;
+            statusTable->setItem(row, 7, stateItem);
+        }
+        stateItem->setIcon(QIcon(statusDotPixmap(runStateColor(status.runState))));
+        stateItem->setText(runStateToString(status.runState));
+
+        // Append to chart — now just adds a data point, replot is throttled by PlotWidget itself
+        plot->appendStatus(status);
     }
-    stateItem->setIcon(QIcon(statusDotPixmap(runStateColor(status.runState))));
-    stateItem->setText(runStateToString(status.runState));
 
-    plot->appendStatus(status);
+    pendingStatuses.clear();
 }
 
 void MonitorPage::onConnectionStateChanged(quint8 deviceId, ConnectionState state)

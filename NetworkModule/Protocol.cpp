@@ -4,6 +4,12 @@
 
 namespace DncScada {
 
+// ODR-use definitions for static constexpr members (required by C++14)
+constexpr quint16 Protocol::Header;
+constexpr int Protocol::FixedHeaderSize;
+constexpr int Protocol::ChecksumSize;
+constexpr int Protocol::MaxPayloadSize;
+
 quint16 Protocol::crc16Modbus(const QByteArray &data)
 {
     quint16 crc = 0xFFFF;

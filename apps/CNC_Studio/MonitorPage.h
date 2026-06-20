@@ -14,6 +14,7 @@
 #include <QSpinBox>
 #include <QTableView>
 #include <QTableWidget>
+#include <QTimer>
 #include <QWidget>
 
 namespace DncScada {
@@ -32,6 +33,7 @@ private slots:
     void onAlarmRaised(AlarmEvent alarm);
     void sendSelectedParameter();
     void onDeviceComboChanged(int index);
+    void flushStatusUpdates();
 
 private:
     void buildUi();
@@ -54,6 +56,9 @@ private:
     QLabel *alarmPlaceholder = nullptr;
     QVector<QWidget*> deviceCards;
     QWidget *deviceCardsContainer = nullptr;
+    QHash<quint8, DeviceStatus> pendingStatuses;
+    QTimer *flushTimer = nullptr;
+    int flushCounter = 0;
 };
 
 } // namespace DncScada

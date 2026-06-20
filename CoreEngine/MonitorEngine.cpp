@@ -122,9 +122,6 @@ void MonitorEngine::onFrameReceived(ProtocolFrame frame)
 
     status.deviceId = frame.deviceId;
     statePool.updateStatus(status);
-    AsyncLogger::instance().log(QStringLiteral("INFO"),
-        QStringLiteral("MonitorEngine emit statusUpdated dev=%1 x=%2 y=%3").arg(status.deviceId).arg(status.x, 0, 'f', 1).arg(status.y, 0, 'f', 1),
-        QStringLiteral(__FILE__), __LINE__);
     emit statusUpdated(status);
 
     if (storageWorker) {

@@ -65,13 +65,15 @@ PlotWidget::PlotWidget(QWidget *parent)
     tracer->setSize(7);
 
     connect(plot, &QCustomPlot::mouseMove, this, [this](QMouseEvent *) {
-        double x = plot->xAxis->pixelToCoord(plot->mapFromGlobal(QCursor::pos()).x());
-        int idx = qRound(x);
+        const double x = plot->xAxis->pixelToCoord(plot->mapFromGlobal(QCursor::pos()).x());
+        const int key = qRound(x);
+        // Convert from graph key to sample array index
+        const int idx = key - qMax(0, static_cast<int>(xIndex) - samples.size());
         if (idx >= 0 && idx < samples.size()) {
             const Sample &s = samples.at(idx);
             tracer->setVisible(true);
             tracer->setGraph(loadGraph);
-            tracer->setGraphKey(idx);
+            tracer->setGraphKey(key);
             tracer->updatePosition();
             QToolTip::showText(QCursor::pos(),
                 QStringLiteral("Load: %1  Temp: %2  RPM/60: %3")
@@ -84,6 +86,12 @@ PlotWidget::PlotWidget(QWidget *parent)
             QToolTip::hideText();
         }
     });
+
+    // Throttle replot to ~20 FPS (50 ms interval)
+    refreshTimer = new QTimer(this);
+    refreshTimer->setInterval(50);
+    connect(refreshTimer, &QTimer::timeout, this, &PlotWidget::refreshPlot);
+    refreshTimer->start();
 }
 
 QSize PlotWidget::minimumSizeHint() const {
@@ -101,30 +109,42 @@ void PlotWidget::appendStatus(DeviceStatus status) {
         samples.removeFirst();
     }
 
-    loadGraph->data()->clear();
-    tempGraph->data()->clear();
-    rpmGraph->data()->clear();
+    // Incremental add — only the new point, no clearing
+    const double key = xIndex;
+    loadGraph->addData(key, qBound(0.0, sample.load, 100.0));
+    tempGraph->addData(key, qBound(0.0, sample.temperature, 100.0));
+    rpmGraph->addData(key, qBound(0.0, sample.rpm, 100.0));
 
-    for (int i = 0; i < samples.size(); ++i) {
-        const Sample &s = samples.at(i);
-        loadGraph->addData(i, qBound(0.0, s.load, 100.0));
-        tempGraph->addData(i, qBound(0.0, s.temperature, 100.0));
-        rpmGraph->addData(i, qBound(0.0, s.rpm, 100.0));
+    // Remove data points that fell out of the window
+    const double removeBefore = key - maxSamples;
+    loadGraph->data()->removeBefore(removeBefore);
+    tempGraph->data()->removeBefore(removeBefore);
+    rpmGraph->data()->removeBefore(removeBefore);
+
+    ++xIndex;
+    dirty = true;
+}
+
+void PlotWidget::refreshPlot() {
+    if (!dirty)
+        return;
+
+    const double lastKey = xIndex - 1.0;
+    if (lastKey > 0.0) {
+        plot->xAxis->setRange(qMax(0.0, lastKey - maxSamples), lastKey + 10);
     }
-
-    if (samples.size() > 1) {
-        plot->xAxis->setRange(qMax(0.0, double(samples.size() - maxSamples)), double(samples.size() + 10));
-    }
-
     plot->replot();
+    dirty = false;
 }
 
 void PlotWidget::clear() {
     samples.clear();
+    xIndex = 0.0;
     loadGraph->data()->clear();
     tempGraph->data()->clear();
     rpmGraph->data()->clear();
-    plot->replot();
+    dirty = true;
+    refreshPlot();
 }
 
 } // namespace DncScada

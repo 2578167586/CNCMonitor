@@ -2,6 +2,7 @@
 #define DNC_SCADA_PLOT_WIDGET_H
 
 #include "Types.h"
+#include <QTimer>
 #include <QWidget>
 
 class QCustomPlot;
@@ -21,6 +22,9 @@ public slots:
     void appendStatus(DeviceStatus status);
     void clear();
 
+private slots:
+    void refreshPlot();
+
 private:
     struct Sample {
         double load = 0.0;
@@ -33,9 +37,11 @@ private:
     QCPGraph *tempGraph = nullptr;
     QCPGraph *rpmGraph = nullptr;
     QCPItemTracer *tracer = nullptr;
+    QTimer *refreshTimer = nullptr;
     QVector<Sample> samples;
     int maxSamples = 300;
     double xIndex = 0.0;
+    bool dirty = false;
 };
 
 } // namespace DncScada

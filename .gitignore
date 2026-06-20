@@ -33,3 +33,7 @@ Desktop.ini
 
 # === Stack dumps ===
 *.stackdump
+
+docs/
+.claude/
+agent.md
